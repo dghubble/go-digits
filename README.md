@@ -18,3 +18,9 @@ go-digits provides Twitter Digits Go packages for implementing Login with Digits
 ## Documentation
 
 Read [GoDoc](https://godoc.org/github.com/dghubble/go-digits)
+
+## License
+
+[MIT License](LICENSE)
+
+

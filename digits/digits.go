@@ -1,3 +1,6 @@
+/*
+Package digits provides a client and models for Digits API services.
+*/
 package digits
 
 import (

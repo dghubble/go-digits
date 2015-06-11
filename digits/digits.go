@@ -1,19 +1,26 @@
 package digits
 
+import (
+	"github.com/dghubble/sling"
+	"net/http"
+)
+
 // DigitsAPI required protocol and domain
 const DigitsAPI = "https://api.digits.com"
+const apiVersion = "/1.1/"
 
-// Account is a Digits user account
-type Account struct {
-	AccessToken AccessToken `json:"access_token"`
-	ID          int64       `json:"id"`
-	IDStr       string      `json:"id_str"`
-	CreatedAt   string      `json:"created_at"`
-	PhoneNumber string      `json:"phone_number"`
+// Client is a Digits client for making Digits API request
+type Client struct {
+	sling *sling.Sling
+	// Digits API Services
+	Accounts *AccountService
 }
 
-// AccessToken is a Digits OAuth1 access token and secret
-type AccessToken struct {
-	Token  string `json:"token"`
-	Secret string `json:"secret"`
+// NewClient returns a new Client.
+func NewClient(httpClient *http.Client) *Client {
+	base := sling.New().Client(httpClient).Base(DigitsAPI + apiVersion)
+	return &Client{
+		sling:    base,
+		Accounts: NewAccountService(base.New()),
+	}
 }

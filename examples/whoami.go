@@ -22,7 +22,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	// TODO: use 'required' env vars tags once that merges upstream
+	// TODO: remove empty string check once required tag is available
+	// https://github.com/kelseyhightower/envconfig/pull/19
 	if c.ConsumerKey == "" || c.ConsumerSecret == "" || c.AccessToken == "" || c.AccessTokenSecret == "" {
 		log.Fatal("Missing required environment variable")
 	}

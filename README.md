@@ -19,6 +19,25 @@ go-digits provides Twitter Digits Go packages for implementing Login with Digits
 
 Read [GoDoc](https://godoc.org/github.com/dghubble/go-digits)
 
+### Digits API
+
+The `digits` package provides a client and models for the Digits API. By design, it is decoupled from OAuth concerns. An `http.Client` which transparently handles OAuth1 request signing should be passed to create a Digits Client. See [dghubble/oauth1](https://github.com/dghubble/oauth1).
+
+```go
+import "github.com/dghubble/go-digits/digits"
+import "github.com/dghubble/oauth1"
+
+authConfig := oauth1.NewConfig("consumerKey", "consumerSecret")
+token := oauth1.NewToken("accessToken", "accessTokenSecret")
+// http.Client will automatically authorize Requests
+httpClient := authConfig.Client(token)
+
+// digits client
+client := digits.NewClient(authClient)
+// get the current user's Digits Account
+account, resp, err := client.Accounts.Account()
+```
+
 ## License
 
 [MIT License](LICENSE)

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example</title>
+    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script id="digits-sdk" src="https://cdn.digits.com/1/sdk.js" async></script>
+  </head>
+
+  <body>
+    <button id="digits_login" type="button">Login with Digits</button>
+  <script>
+  $(document).ready(function() {
+    document.getElementById('digits-sdk').onload = function() {
+      Digits.init({consumerKey:'YOUR_DIGITS_CONSUMER_KEY'});
+      digitsLogin = document.getElementById("digits_login");
+      digitsLogin.addEventListener("click", loginHandler);
+
+      function loginHandler() {
+        Digits.logIn().done(onLogin).fail(onLoginFail);
+      };
+
+      function onLogin(loginResponse) {
+        var oAuthEcho = loginResponse.oauth_echo_headers
+        var unverifiedEcho = {
+          "accountEndpoint": oAuthEcho['X-Auth-Service-Provider'],
+          "accountRequestHeader": oAuthEcho['X-Verify-Credentials-Authorization']
+        };
+        $.ajax({
+          type: 'POST',
+          url: '/digits_login',
+          data: unverifiedEcho,
+          success: function() {
+            window.location.reload();
+          },
+          error: function(err_msg) {
+            console.log(err_msg);
+          }
+        });
+      };
+
+      function onLoginFail(error) {
+        window.location.reload();
+      }
+    };
+  });
+  </script>
+  </body>
+</html>

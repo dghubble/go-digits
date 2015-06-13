@@ -1,6 +1,9 @@
 
 # Examples
 
+## Web App with Digits Login
+
+
 ## Account API
 
 A Digits user grants a consumer application access to its resources (phone number, contacts, etc.) with an OAuth1 access token.
@@ -12,13 +15,9 @@ To demonstrate making a request as the application, on behalf of the user, set t
     export DIGITS_ACCESS_TOKEN=xxx
     export DIGITS_ACCESS_TOKEN_SECRET=xxx
 
-Run
+Compile and run
 
     cd examples
     go run whoami.go
 
 to show account details of the user.
-
-## Web App with Digits Login
-
-TODO

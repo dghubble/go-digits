@@ -35,6 +35,7 @@ func NewAccountService(sling *sling.Sling) *AccountService {
 // Account returns the authenticated user Account.
 func (s *AccountService) Account() (*Account, *http.Response, error) {
 	account := new(Account)
-	resp, err := s.sling.New().Get("account.json").ReceiveSuccess(account)
-	return account, resp, err
+	apiError := new(APIError)
+	resp, err := s.sling.New().Get("account.json").Receive(account, apiError)
+	return account, resp, firstError(err, apiError)
 }

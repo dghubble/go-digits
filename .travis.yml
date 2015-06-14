@@ -9,6 +9,9 @@ before_install:
   - go get github.com/golang/lint/golint
 install:
   - go get -v ./login
+  - go get -v ./digits
 script:
+  - go test -v ./digits
   - go test -v ./login
   - go vet ./...
+  - golint ./...

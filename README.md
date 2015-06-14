@@ -41,10 +41,10 @@ Alternately, add Login with Digits to your existing web app:
     )
     ```
 
-3. Create a `LoginService` struct with your Digits Consumer Key.
+3. Create a login `Service` struct with your Digits Consumer Key.
     
     ```go
-    var dgts = login.NewLoginService("digitsConsumerKey")
+    var dgts = login.NewService("digitsConsumerKey")
     ```
 
 4. Register a LoginHandler to receive POST's from your login page.

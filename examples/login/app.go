@@ -23,7 +23,7 @@ var sessionStore = sessions.NewCookieStore([]byte(sessionSecret), nil)
 
 // digitsService provides a login handler for validation and account retrieval
 // 1. Create a Digits Login Service struct with your Digits Consumer Key
-var digitsService = dgtsLogin.NewLoginService(digitsConsumerKey)
+var digitsService = dgtsLogin.NewService(digitsConsumerKey)
 
 // New returns a new ServeMux with app routes.
 func New() *http.ServeMux {

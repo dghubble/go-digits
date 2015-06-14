@@ -26,16 +26,16 @@ var (
 	consumerKeyRegexp              = regexp.MustCompile("oauth_consumer_key=\"(.*?)\"")
 )
 
-// LoginService provides a Digits login handler which validates logins and
+// Service provides a Digits login handler which validates logins and
 // retrieves Digits accounts.
-type LoginService struct {
+type Service struct {
 	consumerKey string
 	httpClient  *http.Client
 }
 
-// NewLoginService returns a new LoginService.
-func NewLoginService(consumerKey string) *LoginService {
-	return &LoginService{
+// NewService returns a new login Service.
+func NewService(consumerKey string) *Service {
+	return &Service{
 		consumerKey: consumerKey,
 		httpClient:  http.DefaultClient,
 	}
@@ -44,13 +44,13 @@ func NewLoginService(consumerKey string) *LoginService {
 // LoginHandlerFunc receives POST'ed Digits OAuth Echo headers, validates them,
 // retrieves the Digits user account, and calls the given success or failure
 // handler function.
-func (s *LoginService) LoginHandlerFunc(success func(http.ResponseWriter, *http.Request, *digits.Account), failure func(http.ResponseWriter, error, int)) http.Handler {
+func (s *Service) LoginHandlerFunc(success func(http.ResponseWriter, *http.Request, *digits.Account), failure func(http.ResponseWriter, error, int)) http.Handler {
 	return s.loginHandler(successHandlerFunc(success), errorHandlerFunc(failure))
 }
 
 // loginHandler is the implementation of LoginHandlerFunc which accepts success
 // and failure http.Handler's.
-func (s *LoginService) loginHandler(success successHandler, failure errorHandler) http.Handler {
+func (s *Service) loginHandler(success successHandler, failure errorHandler) http.Handler {
 	fn := func(w http.ResponseWriter, req *http.Request) {
 		// validate POST'ed Digits OAuth Echo data
 		req.ParseForm()
@@ -93,7 +93,7 @@ func requestAccount(client *http.Client, accountEndpoint, authorizationHeader st
 // validateEcho checks that the Digits OAuth Echo arguments are valid. If the
 // endpoint does not match the Digits API or the header does not include the
 // correct consumer key, a non-nil error is returned.
-func (s *LoginService) validateEcho(accountEndpoint, accountRequestHeader string) error {
+func (s *Service) validateEcho(accountEndpoint, accountRequestHeader string) error {
 	if accountEndpoint == "" {
 		return ErrMissingAccountEndpoint
 	}

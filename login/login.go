@@ -1,7 +1,3 @@
-/*
-Package login provides a LoginService for adding Login with Digits to an
-authentication system.
-*/
 package login
 
 import (
@@ -48,14 +44,6 @@ func NewLoginService(consumerKey string) *LoginService {
 // LoginHandlerFunc receives POST'ed Digits OAuth Echo headers, validates them,
 // retrieves the Digits user account, and calls the given success or failure
 // handler function.
-// Typical usage is to write a client-side javascript onLogin function to POST
-// a form "accountEndpoint=xxx&accountRequestHeader=yyy" to your Go server and
-// register LoginHandlerFunc to receive the request.
-//
-//    digitsService := login.NewLoginService("my_consumer_key")
-//    http.Handle("/digits", digitsService.LoginHandlerFunc(successHandler, login.ErrorHandler))
-//
-// Write successHandler to issue your choice of session.
 func (s *LoginService) LoginHandlerFunc(success func(http.ResponseWriter, *http.Request, *digits.Account), failure func(http.ResponseWriter, error, int)) http.Handler {
 	return s.loginHandler(successHandlerFunc(success), errorHandlerFunc(failure))
 }

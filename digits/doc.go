@@ -1,10 +1,8 @@
-package digits
-
 /*
 Package digits provides a client and models for the Digits API.
 
-The digits package provides a client and models for Digits API services. By
-design, the package is decoupled from OAuth concerns. An `http.Client` which
+The digits package provides a client and models for the Digits API. By design,
+the package is decoupled from OAuth concerns. An http.Client which
 transparently handles OAuth1 request signing should be passed to create a
 Digits Client. See https://github.com/dghubble/oauth1.
 
@@ -20,4 +18,6 @@ Digits Client. See https://github.com/dghubble/oauth1.
 	client := digits.NewClient(authClient)
 	// get the current user's Digits Account
 	account, resp, err := client.Accounts.Account()
+
 */
+package digits

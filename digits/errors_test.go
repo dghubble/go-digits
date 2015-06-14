@@ -11,7 +11,7 @@ var testAPIError = &APIError{
 		ErrorDetail{Message: "Could not authenticate you.", Code: 32},
 	},
 }
-var testNetworkError = fmt.Errorf("unknown host")
+var errTestError = fmt.Errorf("unknown host")
 
 func TestAPIError_ErrorString(t *testing.T) {
 	err := APIError{}
@@ -43,8 +43,8 @@ func TestFirstError(t *testing.T) {
 		{nil, nil, nil},
 		{nil, &APIError{}, nil},
 		{nil, testAPIError, testAPIError},
-		{testNetworkError, &APIError{}, testNetworkError},
-		{testNetworkError, testAPIError, testNetworkError},
+		{errTestError, &APIError{}, errTestError},
+		{errTestError, testAPIError, errTestError},
 	}
 	for _, c := range cases {
 		err := firstError(c.httpError, c.apiError)

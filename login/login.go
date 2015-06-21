@@ -41,16 +41,10 @@ func NewService(consumerKey string) *Service {
 	}
 }
 
-// LoginHandlerFunc receives POST'ed Digits OAuth Echo headers, validates them,
-// retrieves the Digits user account, and calls the given success or failure
-// handler function.
-func (s *Service) LoginHandlerFunc(success func(http.ResponseWriter, *http.Request, *digits.Account), failure func(http.ResponseWriter, error, int)) http.Handler {
-	return s.loginHandler(successHandlerFunc(success), errorHandlerFunc(failure))
-}
-
-// loginHandler is the implementation of LoginHandlerFunc which accepts success
-// and failure http.Handler's.
-func (s *Service) loginHandler(success successHandler, failure errorHandler) http.Handler {
+// LoginHandler receives POSTed Digits Web OAuth Echo headers, requests the
+// Digits Account, and (if successful) delegates handling to the
+// SuccessHandler. Otherwise, the ErrorHandler responds to the request.
+func (s *Service) LoginHandler(success SuccessHandler, failure ErrorHandler) http.Handler {
 	fn := func(w http.ResponseWriter, req *http.Request) {
 		// validate POST'ed Digits OAuth Echo data
 		req.ParseForm()
@@ -66,7 +60,7 @@ func (s *Service) loginHandler(success successHandler, failure errorHandler) htt
 		account, resp, err := requestAccount(s.httpClient, accountEndpoint, accountRequestHeader)
 
 		// validate the Digits Account
-		err = validateAccountResponse(account, resp, err)
+		err = ValidateAccountResponse(account, resp, err)
 		if err != nil {
 			failure.ServeHTTP(w, err, http.StatusBadRequest)
 			return
@@ -112,10 +106,10 @@ func (s *Service) validateEcho(accountEndpoint, accountRequestHeader string) err
 	return nil
 }
 
-// validateAccountResponse checks that the response to the Digits account
-// endpoint was successful and that a valid Account was received. Otherwise
-// return a non-nil error.
-func validateAccountResponse(account *digits.Account, resp *http.Response, err error) error {
+// ValidateAccountResponse returns an error if the given Digits Account, raw
+// http.Response, or error from Digits are unexpected. Returns nil if the
+// account response is valid.
+func ValidateAccountResponse(account *digits.Account, resp *http.Response, err error) error {
 	if err != nil || resp.StatusCode != http.StatusOK || account == nil {
 		return ErrUnableToGetDigitsAccount
 	}
@@ -126,33 +120,40 @@ func validateAccountResponse(account *digits.Account, resp *http.Response, err e
 	return nil
 }
 
-// ErrorHandler replies to requests with the given error message and code.
-// This handler is appropriate for most login handler uses, unless custom
-// error messages/codes should be returned.
-func ErrorHandler(w http.ResponseWriter, err error, code int) {
-	http.Error(w, err.Error(), code)
-}
-
-// Internal Handlers
-
-// successHandler is called when account login succeeds.
-type successHandler interface {
+// SuccessHandler is called when authentication via Digits succeeds.
+type SuccessHandler interface {
 	ServeHTTP(w http.ResponseWriter, req *http.Request, account *digits.Account)
 }
 
-type successHandlerFunc func(w http.ResponseWriter, req *http.Request, account *digits.Account)
-
-func (f successHandlerFunc) ServeHTTP(w http.ResponseWriter, req *http.Request, account *digits.Account) {
-	f(w, req, account)
-}
-
-// errorHandler is called when account login fails.
-type errorHandler interface {
+// ErrorHandler is called when authentication via Digits fails.
+type ErrorHandler interface {
 	ServeHTTP(w http.ResponseWriter, err error, code int)
 }
 
-type errorHandlerFunc func(w http.ResponseWriter, err error, code int)
+// DefaultErrorHandler responds to requests by passing through the error
+// message and code from the login library.
+var DefaultErrorHandler = &passthroughErrorHandler{}
 
-func (f errorHandlerFunc) ServeHTTP(w http.ResponseWriter, err error, code int) {
+type passthroughErrorHandler struct{}
+
+func (e passthroughErrorHandler) ServeHTTP(w http.ResponseWriter, err error, code int) {
+	http.Error(w, err.Error(), code)
+}
+
+// HandlerFunc adapters
+
+// SuccessHandlerFunc is an adapter to allow an ordinary function to be used as
+// a SuccessHandler.
+type SuccessHandlerFunc func(w http.ResponseWriter, req *http.Request, account *digits.Account)
+
+func (f SuccessHandlerFunc) ServeHTTP(w http.ResponseWriter, req *http.Request, account *digits.Account) {
+	f(w, req, account)
+}
+
+// ErrorHandlerFunc is an adapter to allow an ordinary function to be used as
+// an ErrorHandlerFunc.
+type ErrorHandlerFunc func(w http.ResponseWriter, err error, code int)
+
+func (f ErrorHandlerFunc) ServeHTTP(w http.ResponseWriter, err error, code int) {
 	f(w, err, code)
 }

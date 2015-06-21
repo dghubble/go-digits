@@ -102,19 +102,19 @@ func TestValidateAccountResponse(t *testing.T) {
 	respErr := errors.New("some error decoding Account")
 
 	// success case
-	if err := validateAccountResponse(validAccount, successResp, nil); err != nil {
+	if err := ValidateAccountResponse(validAccount, successResp, nil); err != nil {
 		t.Errorf("expected error to be nil, got %v", err)
 	}
 
 	// error cases
 	errorCases := []error{
 		// account missing credentials
-		validateAccountResponse(emptyAccount, successResp, nil),
+		ValidateAccountResponse(emptyAccount, successResp, nil),
 		// Digits account API did not return a 200
-		validateAccountResponse(validAccount, badResp, nil),
+		ValidateAccountResponse(validAccount, badResp, nil),
 		// Network error or JSON unmarshalling error
-		validateAccountResponse(validAccount, successResp, respErr),
-		validateAccountResponse(validAccount, badResp, respErr),
+		ValidateAccountResponse(validAccount, successResp, respErr),
+		ValidateAccountResponse(validAccount, badResp, respErr),
 	}
 	for _, err := range errorCases {
 		if err != ErrUnableToGetDigitsAccount {
@@ -127,7 +127,7 @@ func TestErrorHandler(t *testing.T) {
 	const expectedMessage = "digits: some error"
 	rec := httptest.NewRecorder()
 	// should pass through errors and codes
-	ErrorHandler(rec, fmt.Errorf(expectedMessage), http.StatusBadRequest)
+	DefaultErrorHandler.ServeHTTP(rec, fmt.Errorf(expectedMessage), http.StatusBadRequest)
 	if rec.Code != http.StatusBadRequest {
 		t.Errorf("expected code %v, got %v", http.StatusBadRequest, rec.Code)
 	}
@@ -136,7 +136,7 @@ func TestErrorHandler(t *testing.T) {
 	}
 }
 
-func TestLoginHandlerFunc_successEndToEnd(t *testing.T) {
+func TestLoginHandler_successEndToEnd(t *testing.T) {
 	digitsProxyClient, _, server := setupDigitsTestServer(testAccountJSON)
 	defer server.Close()
 
@@ -144,7 +144,7 @@ func TestLoginHandlerFunc_successEndToEnd(t *testing.T) {
 	s := NewService(testConsumerKey)
 	// proxies all requests to the digits test server
 	s.httpClient = digitsProxyClient
-	ts := httptest.NewServer(s.LoginHandlerFunc(successChecks(t), errorOnFailure(t)))
+	ts := httptest.NewServer(s.LoginHandler(SuccessHandlerFunc(successChecks(t)), ErrorHandlerFunc(errorOnFailure(t))))
 
 	// POST Digits OAuth Echo headers
 	resp, err := http.PostForm(ts.URL, url.Values{"accountEndpoint": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
@@ -164,7 +164,7 @@ func TestLoginHandlerFunc_invalidPOSTArguments(t *testing.T) {
 	s := NewService(testConsumerKey)
 	// proxies all requests to the digits test server
 	s.httpClient = digitsProxyClient
-	ts := httptest.NewServer(s.LoginHandlerFunc(errorOnSuccess(t), ErrorHandler))
+	ts := httptest.NewServer(s.LoginHandler(SuccessHandlerFunc(errorOnSuccess(t)), DefaultErrorHandler))
 
 	// POST Digits OAuth Echo headers
 	resp, _ := http.PostForm(ts.URL, url.Values{"wrongKeyName": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
@@ -186,7 +186,7 @@ func TestLoginHandlerFunc_unauthorized(t *testing.T) {
 	s := NewService(testConsumerKey)
 	// proxies all requests to the digits test server
 	s.httpClient = digitsProxyClient
-	ts := httptest.NewServer(s.LoginHandlerFunc(errorOnSuccess(t), ErrorHandler))
+	ts := httptest.NewServer(s.LoginHandler(SuccessHandlerFunc(errorOnSuccess(t)), DefaultErrorHandler))
 
 	// POST Digits OAuth Echo headers
 	resp, _ := http.PostForm(ts.URL, url.Values{"accountEndpoint": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
@@ -196,7 +196,7 @@ func TestLoginHandlerFunc_unauthorized(t *testing.T) {
 func TestLoginHandlerFunc_digitsAPIDown(t *testing.T) {
 	// setup test server which uses go-digits/login for Digits login
 	s := NewService(testConsumerKey)
-	ts := httptest.NewServer(s.LoginHandlerFunc(errorOnSuccess(t), ErrorHandler))
+	ts := httptest.NewServer(s.LoginHandler(SuccessHandlerFunc(errorOnSuccess(t)), DefaultErrorHandler))
 	// POST Digits OAuth Echo headers
 	resp, _ := http.PostForm(ts.URL, url.Values{"accountEndpoint": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
 	assertBodyString(t, resp.Body, ErrUnableToGetDigitsAccount.Error()+"\n")

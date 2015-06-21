@@ -32,13 +32,13 @@ func New() *http.ServeMux {
 	mux.Handle("/profile", requireLogin(http.HandlerFunc(profileHandler)))
 	mux.HandleFunc("/logout", logoutHandler)
 	// 2. Register a Digits LoginHandler to receive POST from JS after login
-	mux.Handle("/digits_login", digitsService.LoginHandlerFunc(successHandler, dgtsLogin.ErrorHandler))
+	mux.Handle("/digits_login", digitsService.LoginHandler(dgtsLogin.SuccessHandlerFunc(issueWebSession), dgtsLogin.DefaultErrorHandler))
 	return mux
 }
 
-// successHandler issues a cookie session upon successful Digits login
-func successHandler(w http.ResponseWriter, req *http.Request, account *dgtsAPI.Account) {
-	// 3. Implement successHandler to issue some form of session or write to db
+// issueWebSession issues a cookie session upon successful Digits login
+func issueWebSession(w http.ResponseWriter, req *http.Request, account *dgtsAPI.Account) {
+	// 3. Implement a SuccessHandler to issue some form of session or write to db
 	session := sessionStore.New(sessionName)
 	session.Values[sessionUserKey] = account.ID
 	session.Values["phoneNumber"] = account.PhoneNumber

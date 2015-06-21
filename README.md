@@ -79,7 +79,7 @@ token := oauth1.NewToken("accessToken", "accessTokenSecret")
 httpClient := authConfig.Client(token)
 
 // digits client
-client := digits.NewClient(authClient)
+client := digits.NewClient(httpClient)
 // get the current user's Digits Account
 account, resp, err := client.Accounts.Account()
 ```

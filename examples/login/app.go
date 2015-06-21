@@ -3,8 +3,8 @@ package main
 
 import (
 	"fmt"
-	dgtsAPI "github.com/dghubble/go-digits/digits"
-	dgtsLogin "github.com/dghubble/go-digits/login"
+	"github.com/dghubble/go-digits/digits"
+	"github.com/dghubble/go-digits/login"
 	"github.com/dghubble/sessions"
 	"io/ioutil"
 	"log"
@@ -21,24 +21,26 @@ const (
 // sessionStore encodes and decodes session data stored in signed cookies
 var sessionStore = sessions.NewCookieStore([]byte(sessionSecret), nil)
 
-// digitsService provides a login handler for validation and account retrieval
-// 1. Create a Digits Login Service struct with your Digits Consumer Key
-var digitsService = dgtsLogin.NewService(digitsConsumerKey)
-
 // New returns a new ServeMux with app routes.
 func New() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", homeHandler)
 	mux.Handle("/profile", requireLogin(http.HandlerFunc(profileHandler)))
 	mux.HandleFunc("/logout", logoutHandler)
-	// 2. Register a Digits LoginHandler to receive POST from JS after login
-	mux.Handle("/digits_login", digitsService.LoginHandler(dgtsLogin.SuccessHandlerFunc(issueWebSession), dgtsLogin.DefaultErrorHandler))
+
+	// 1. Register a Digits WebHandler to receive Javascript login POST
+	handlerConfig := login.Config{
+		ConsumerKey: digitsConsumerKey,
+		Success:     login.SuccessHandlerFunc(issueWebSession),
+		Failure:     login.DefaultErrorHandler,
+	}
+	mux.Handle("/digits_login", login.NewWebHandler(handlerConfig))
 	return mux
 }
 
 // issueWebSession issues a cookie session upon successful Digits login
-func issueWebSession(w http.ResponseWriter, req *http.Request, account *dgtsAPI.Account) {
-	// 3. Implement a SuccessHandler to issue some form of session or write to db
+func issueWebSession(w http.ResponseWriter, req *http.Request, account *digits.Account) {
+	// 2. Implement a SuccessHandler to issue some form of session or write to db
 	session := sessionStore.New(sessionName)
 	session.Values[sessionUserKey] = account.ID
 	session.Values["phoneNumber"] = account.PhoneNumber

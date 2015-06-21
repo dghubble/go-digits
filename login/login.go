@@ -26,49 +26,60 @@ var (
 	consumerKeyRegexp              = regexp.MustCompile("oauth_consumer_key=\"(.*?)\"")
 )
 
-// Service provides a Digits login handler which validates logins and
-// retrieves Digits accounts.
-type Service struct {
+// Config configures a WebHandler.
+type Config struct {
+	ConsumerKey string
+	HTTPClient  *http.Client
+	Success     SuccessHandler
+	Failure     ErrorHandler
+}
+
+// WebHandler receives POSTed Web OAuth Echo headers, validates them, and
+// fetches the Digits Account. If successful, handling is delegated to the
+// SuccessHandler. Otherwise, the ErrorHandler is called.
+type WebHandler struct {
 	consumerKey string
 	httpClient  *http.Client
+	success     SuccessHandler
+	failure     ErrorHandler
 }
 
-// NewService returns a new login Service.
-func NewService(consumerKey string) *Service {
-	return &Service{
-		consumerKey: consumerKey,
-		httpClient:  http.DefaultClient,
+// NewWebHandler returns a new WebHandler.
+func NewWebHandler(config Config) *WebHandler {
+	httpClient := config.HTTPClient
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+	return &WebHandler{
+		consumerKey: config.ConsumerKey,
+		httpClient:  httpClient,
+		success:     config.Success,
+		failure:     config.Failure,
 	}
 }
 
-// LoginHandler receives POSTed Digits Web OAuth Echo headers, requests the
-// Digits Account, and (if successful) delegates handling to the
-// SuccessHandler. Otherwise, the ErrorHandler responds to the request.
-func (s *Service) LoginHandler(success SuccessHandler, failure ErrorHandler) http.Handler {
-	fn := func(w http.ResponseWriter, req *http.Request) {
-		// validate POST'ed Digits OAuth Echo data
-		req.ParseForm()
-		accountEndpoint := req.PostForm.Get(accountEndpointKey)
-		accountRequestHeader := req.PostForm.Get(accountRequestHeaderKey)
-		err := s.validateEcho(accountEndpoint, accountRequestHeader)
-		if err != nil {
-			failure.ServeHTTP(w, err, http.StatusBadRequest)
-			return
-		}
-
-		// fetch Digits account from the API
-		account, resp, err := requestAccount(s.httpClient, accountEndpoint, accountRequestHeader)
-
-		// validate the Digits Account
-		err = ValidateAccountResponse(account, resp, err)
-		if err != nil {
-			failure.ServeHTTP(w, err, http.StatusBadRequest)
-			return
-		}
-		success.ServeHTTP(w, req, account)
+// ServeHTTP receives POSTed Web OAuth Echo headers, validates them, and
+// fetches the Digits Account. If successful, handling is delegated to the
+// SuccessHandler. Otherwise, the ErrorHandler is called.
+func (h *WebHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	req.ParseForm()
+	accountEndpoint := req.PostForm.Get(accountEndpointKey)
+	accountRequestHeader := req.PostForm.Get(accountRequestHeaderKey)
+	// validate POST'ed Digits OAuth Echo data
+	err := validateEcho(accountEndpoint, accountRequestHeader, h.consumerKey)
+	if err != nil {
+		h.failure.ServeHTTP(w, err, http.StatusBadRequest)
+		return
 	}
-
-	return http.HandlerFunc(fn)
+	// fetch Digits account from the API
+	account, resp, err := requestAccount(h.httpClient, accountEndpoint, accountRequestHeader)
+	// validate the Digits Account
+	err = ValidateAccountResponse(account, resp, err)
+	if err != nil {
+		h.failure.ServeHTTP(w, err, http.StatusBadRequest)
+		return
+	}
+	h.success.ServeHTTP(w, req, account)
 }
 
 // requestAccount makes a request to the Digits account endpoint using the
@@ -87,7 +98,7 @@ func requestAccount(client *http.Client, accountEndpoint, authorizationHeader st
 // validateEcho checks that the Digits OAuth Echo arguments are valid. If the
 // endpoint does not match the Digits API or the header does not include the
 // correct consumer key, a non-nil error is returned.
-func (s *Service) validateEcho(accountEndpoint, accountRequestHeader string) error {
+func validateEcho(accountEndpoint, accountRequestHeader, consumerKey string) error {
 	if accountEndpoint == "" {
 		return ErrMissingAccountEndpoint
 	}
@@ -100,7 +111,7 @@ func (s *Service) validateEcho(accountEndpoint, accountRequestHeader string) err
 	}
 	// validate the OAuth Echo data's auth header consumer key
 	matches := consumerKeyRegexp.FindStringSubmatch(accountRequestHeader)
-	if len(matches) != 2 || matches[1] != s.consumerKey {
+	if len(matches) != 2 || matches[1] != consumerKey {
 		return ErrInvalidConsumerKey
 	}
 	return nil

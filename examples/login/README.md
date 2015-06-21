@@ -1,15 +1,21 @@
 
 # Digits Login
 
-Digits provides phone number login via SMS confirmation codes for any web app or mobile app. The Digits javascipt snippet launches a web popup which accepts a phone number and confirmation code and returns OAuth Echo headers [source](https://dev.twitter.com/twitter-kit/web/digits). These headers **must** be validated on your Go server before issuing a web session.
+Twitter's [Digits](http://get.digits.com/) service provides phone number login via SMS confirmation codes for any web app or mobile app.
+
+## Digits for Web
+
+The Digits Javascipt snippet launches a web popup for user phone number and confirmation code entry. OAuth Echo headers [source](https://dev.twitter.com/twitter-kit/web/digits) are returned to the page.
+
+To use Digits to authenticate to your own backend, these headers should be posted to your server, validated, and used to fetch the user's Digits account and access token. That's where `go-digits` `login` comes in.
 
 ## Web App with Digits Login
 
-Package `login` provides a handler which receives POST'ed OAuth Echo headers, uses them to get a validated `Digits.Account`, and calls your success handler (or error handler) to issue a session.
+Package `login` provides a `WebHandler` which receives POSTed OAuth Echo headers, validates them, and fetches the `Digits.Account`. Handling is then delegated to your own `SuccessHandler` or `ErrorHandler`. Typical behavior is to issue a web session when successful or use the `DefaultErrorHandler` for failures.
 
-[app.go](app.go) shows a tiny web app which issues a client-side cookie session upon successful Digits login. It does not write the Digits `Account` details to a database, though it could do so in the success handler.
+[app.go](app.go) shows an example web app which issues a client-side cookie sessions and persists no data.
 
-## Getting Started
+### Getting Started
 
 Get the `login` package, the examples, and their dependencies.
 
@@ -17,20 +23,21 @@ Get the `login` package, the examples, and their dependencies.
     cd $GOPATH/src/github.com/dghubble/go-digits/examples/login
     go get .
 
-Create a Digits application to obtain your consumer key/secret. Currently this must be done by creating a dummy iOS or Android app via the Fabric [iOS Mac App](https://fabric.io/downloads/xcode) or [Android Studio Plugin](https://fabric.io/downloads). Once you've obtained a Digits consumer key, paste it in for `YOUR_DIGITS_CONSUMER_KEY` in `app.go` and `home.html`.
+Create a Digits application to obtain your consumer key/secret. Paste in your **Consumer Key** for `YOUR_DIGITS_CONSUMER_KEY` in `app.go` and `home.html`.
 
-Compile and run the app:
+Note: Currently a Digits application must be created by making a dummy iOS or Android app via the Fabric [iOS Mac App](https://fabric.io/downloads/xcode) or [Android Studio Plugin](https://fabric.io/downloads).
+
+Compile and run the app from the `examples/login` directory:
 
     go run app.go
 
-## Results
+### Web Login in Action
 
-Clicking the "Login with Digits" button should launch the phone number login flow.
+1. Clicking the "Login with Digits" button launches the phone number login popup.
 
 ![Phone Number Login](http://storage.googleapis.com/dghubble/digits-phone-number.png)
 
-After the user enters a phone number and enters the SMS confirmation number, the Javascript snippet POST's the OAuth Echo data to the tiny Go server.
+2. User enters a phone number and received SMS confirmation number. The Javascript snippet recevies OAuth Echo headers and POSTs them to the Go server.
 
-If the echo data validates correctly, a Digits `Account` is provided to the successHandler, which issues a cookie session and redirects to a page that is only visible to logged in users.
-
+3. If valid, the Digits `Account` is provided to the `SuccessHandler`. A cookie session is issued so the user is considered logged in.
 

@@ -21,16 +21,14 @@ const (
 )
 
 func TestValidateEcho_missingAccountEndpoint(t *testing.T) {
-	s := NewService(testConsumerKey)
-	err := s.validateEcho("", testAccountRequestHeader)
+	err := validateEcho("", testAccountRequestHeader, testConsumerKey)
 	if err != ErrMissingAccountEndpoint {
 		t.Errorf("expected error %v, got %v", ErrMissingAccountEndpoint, err)
 	}
 }
 
 func TestValidateEcho_missingAccountRequestHeader(t *testing.T) {
-	s := NewService(testConsumerKey)
-	err := s.validateEcho(testAccountEndpoint, "")
+	err := validateEcho(testAccountEndpoint, "", testConsumerKey)
 	if err != ErrMissingAccountRequestHeader {
 		t.Errorf("expected error %v, got %v", ErrMissingAccountRequestHeader, err)
 	}
@@ -48,9 +46,8 @@ func TestValidateEcho_digitsEndpoint(t *testing.T) {
 		// respect the path defined in Digits javascript sdk
 		{"https://api.digits.com/2.0/future/so/cool.json", true},
 	}
-	s := NewService(testConsumerKey)
 	for _, c := range cases {
-		err := s.validateEcho(c.endpoint, testAccountRequestHeader)
+		err := validateEcho(c.endpoint, testAccountRequestHeader, testConsumerKey)
 		if c.valid && err != nil {
 			t.Errorf("expected endpoint %q to be valid, got error %v", c.endpoint, err)
 		}
@@ -76,9 +73,8 @@ func TestValidateEcho_headerConsumerKey(t *testing.T) {
 		{`OAuth oauth_token="mykey"`, false},
 		{"OAuth", false},
 	}
-	s := NewService(testConsumerKey)
 	for _, c := range cases {
-		err := s.validateEcho(testAccountEndpoint, c.header)
+		err := validateEcho(testAccountEndpoint, c.header, testConsumerKey)
 		if c.valid && err != nil {
 			t.Errorf("expected header %q to be valid, got error %v", c.header, err)
 		}
@@ -141,10 +137,14 @@ func TestLoginHandler_successEndToEnd(t *testing.T) {
 	defer server.Close()
 
 	// setup test server which uses go-digits/login for Digits login
-	s := NewService(testConsumerKey)
-	// proxies all requests to the digits test server
-	s.httpClient = digitsProxyClient
-	ts := httptest.NewServer(s.LoginHandler(SuccessHandlerFunc(successChecks(t)), ErrorHandlerFunc(errorOnFailure(t))))
+	handlerConfig := Config{
+		ConsumerKey: testConsumerKey,
+		// proxies all requests to the digits test server
+		HTTPClient: digitsProxyClient,
+		Success:    SuccessHandlerFunc(successChecks(t)),
+		Failure:    ErrorHandlerFunc(errorOnFailure(t)),
+	}
+	ts := httptest.NewServer(NewWebHandler(handlerConfig))
 
 	// POST Digits OAuth Echo headers
 	resp, err := http.PostForm(ts.URL, url.Values{"accountEndpoint": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
@@ -160,11 +160,13 @@ func TestLoginHandlerFunc_invalidPOSTArguments(t *testing.T) {
 	digitsProxyClient, _, server := setupDigitsTestServer(testAccountJSON)
 	defer server.Close()
 
-	// setup test server which uses go-digits/login for Digits login
-	s := NewService(testConsumerKey)
-	// proxies all requests to the digits test server
-	s.httpClient = digitsProxyClient
-	ts := httptest.NewServer(s.LoginHandler(SuccessHandlerFunc(errorOnSuccess(t)), DefaultErrorHandler))
+	handlerConfig := Config{
+		ConsumerKey: testConsumerKey,
+		HTTPClient:  digitsProxyClient,
+		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
+		Failure:     DefaultErrorHandler,
+	}
+	ts := httptest.NewServer(NewWebHandler(handlerConfig))
 
 	// POST Digits OAuth Echo headers
 	resp, _ := http.PostForm(ts.URL, url.Values{"wrongKeyName": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
@@ -182,11 +184,13 @@ func TestLoginHandlerFunc_unauthorized(t *testing.T) {
 	digitsProxyClient, _, server := setupUnauthorizedDigitsTestServer()
 	defer server.Close()
 
-	// setup test server which uses go-digits/login for Digits login
-	s := NewService(testConsumerKey)
-	// proxies all requests to the digits test server
-	s.httpClient = digitsProxyClient
-	ts := httptest.NewServer(s.LoginHandler(SuccessHandlerFunc(errorOnSuccess(t)), DefaultErrorHandler))
+	handlerConfig := Config{
+		ConsumerKey: testConsumerKey,
+		HTTPClient:  digitsProxyClient,
+		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
+		Failure:     DefaultErrorHandler,
+	}
+	ts := httptest.NewServer(NewWebHandler(handlerConfig))
 
 	// POST Digits OAuth Echo headers
 	resp, _ := http.PostForm(ts.URL, url.Values{"accountEndpoint": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
@@ -194,9 +198,13 @@ func TestLoginHandlerFunc_unauthorized(t *testing.T) {
 }
 
 func TestLoginHandlerFunc_digitsAPIDown(t *testing.T) {
-	// setup test server which uses go-digits/login for Digits login
-	s := NewService(testConsumerKey)
-	ts := httptest.NewServer(s.LoginHandler(SuccessHandlerFunc(errorOnSuccess(t)), DefaultErrorHandler))
+	handlerConfig := Config{
+		ConsumerKey: testConsumerKey,
+		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
+		Failure:     DefaultErrorHandler,
+	}
+	ts := httptest.NewServer(NewWebHandler(handlerConfig))
+
 	// POST Digits OAuth Echo headers
 	resp, _ := http.PostForm(ts.URL, url.Values{"accountEndpoint": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
 	assertBodyString(t, resp.Body, ErrUnableToGetDigitsAccount.Error()+"\n")

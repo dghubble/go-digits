@@ -15,7 +15,7 @@ Digits Client. See https://github.com/dghubble/oauth1.
 	httpClient := authConfig.Client(token)
 
 	// digits client
-	client := digits.NewClient(authClient)
+	client := digits.NewClient(httpClient)
 	// get the current user's Digits Account
 	account, resp, err := client.Accounts.Account()
 

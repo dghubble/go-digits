@@ -1,15 +1,16 @@
 
-# go-digits [![Build Status](https://travis-ci.org/dghubble/go-digits.png)](https://travis-ci.org/dghubble/go-digits) [![GoDoc](http://godoc.org/github.com/dghubble/go-digits?status.png)](http://godoc.org/github.com/dghubble/go-digits) <img align="right" src="http://storage.googleapis.com/dghubble/digits-gopher.png">
+# go-digits [![Build Status](https://travis-ci.org/dghubble/go-digits.png)](https://travis-ci.org/dghubble/go-digits) [![GoDoc](http://godoc.org/github.com/dghubble/go-digits?status.png)](http://godoc.org/github.com/dghubble/go-digits)
+<img align="right" src="http://storage.googleapis.com/dghubble/digits-gopher.png">
 
-go-digits provides unofficial Go packages for (Twitter) Digits. Add Login with Digits (phone number login) to your Go server or make Accounts API requests.
+go-digits provides unofficial Go packages for (Twitter) Digits. Add Digits (phone number login to your Go server or make Accounts API requests.
 
 ### Packages
 
 #### login [![Coverage](http://gocover.io/_badge/github.com/dghubble/go-digits/login)](http://gocover.io/github.com/dghubble/go-digits/login) [![GoDoc](http://godoc.org/github.com/dghubble/go-digits/login?status.png)](http://godoc.org/github.com/dghubble/go-digits/login)
 
-* Provides a login handler for adding Login with Digits to your web app
-* Register `LoginHandlerFunc` on your `ServeMux` to handle Digits login validation and account retrieval.
-* Works with any session library you prefer.
+* Provides a login handler for adding Digits phone number login to web apps
+* Register a `WebHandler` on your `ServeMux` to handle Digits web logins
+* Works with any session library you prefer. No context dependencies.
 
 #### digits [![Coverage](http://gocover.io/_badge/github.com/dghubble/go-digits/digits)](http://gocover.io/github.com/dghubble/go-digits/digits) [![GoDoc](http://godoc.org/github.com/dghubble/go-digits/digits?status.png)](http://godoc.org/github.com/dghubble/go-digits/digits)
 
@@ -27,7 +28,7 @@ Read [GoDoc](https://godoc.org/github.com/dghubble/go-digits)
 
 ### Login with Digits
 
-Get started with the [100 line web app](examples/login) example. Paste in your Digits consumer key and run it to see login by phone number in action.
+Get started with the [example app](examples/login). Paste in your Digits consumer key and run it locally to see phone number login in action.
 
 Alternately, add Login with Digits to your existing web app:
 
@@ -41,29 +42,28 @@ Alternately, add Login with Digits to your existing web app:
     )
     ```
 
-3. Create a login `Service` struct with your Digits Consumer Key.
-    
-    ```go
-    var dgts = login.NewService("digitsConsumerKey")
-    ```
-
-4. Register a LoginHandler to receive POST's from your login page.
+3. Register a `WebHandler` to receive POST's from your login page.
 
     ```go
-    http.Handle("/digits_login", dgts.LoginHandlerFunc(successHandler,
-        login.ErrorHandler))
+    handlerConfig := login.Config{
+        ConsumerKey: "YOUR_DIGITS_CONSUMER_KEY",
+        Success: login.SuccessHandlerFunc(issueWebSession),
+        Failure: login.DefaultErrorHandler,
+    }
+    http.Handle("/digits_login", login.NewWebHandler(handlerConfig))
     ```
 
-5. Receive the validated `Digits.Account` in a `successHandler` and issue any kind of session you prefer.
+4. Receive the validated `Digits.Account` in a `SuccessHandler`. Issue a session your backend supports.
 
-```
-func successHandler(w http.ResponseWriter, r *http.Request, account *digits.Account) {
-    session := sessionStore.New(sessionName)
-    session.Values["digitsID"] = account.ID
-    session.Save(w)
-    http.Redirect(w, r, "/profile", http.StatusFound)
-}
-```
+    ```
+    func issueWebSession(w http.ResponseWriter, r *http.Request, account *digits.Account) {
+        session := sessionStore.New(sessionName)
+        session.Values["digitsID"] = account.ID
+        session.Values["phoneNumer"] = account.PhoneNumber
+        session.Save(w)
+        http.Redirect(w, r, "/profile", http.StatusFound)
+    }
+    ```
 
 ### Digits API
 

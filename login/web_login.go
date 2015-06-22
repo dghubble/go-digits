@@ -26,8 +26,8 @@ var (
 	consumerKeyRegexp              = regexp.MustCompile("oauth_consumer_key=\"(.*?)\"")
 )
 
-// Config configures a WebHandler.
-type Config struct {
+// WebHandlerConfig configures a WebHandler.
+type WebHandlerConfig struct {
 	ConsumerKey string
 	HTTPClient  *http.Client
 	Success     SuccessHandler
@@ -45,7 +45,7 @@ type WebHandler struct {
 }
 
 // NewWebHandler returns a new WebHandler.
-func NewWebHandler(config Config) *WebHandler {
+func NewWebHandler(config WebHandlerConfig) *WebHandler {
 	httpClient := config.HTTPClient
 	if httpClient == nil {
 		httpClient = http.DefaultClient
@@ -71,7 +71,7 @@ func (h *WebHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		h.failure.ServeHTTP(w, err, http.StatusBadRequest)
 		return
 	}
-	// fetch Digits account from the API
+	// fetch Digits Account
 	account, resp, err := requestAccount(h.httpClient, accountEndpoint, accountRequestHeader)
 	// validate the Digits Account
 	err = ValidateAccountResponse(account, resp, err)

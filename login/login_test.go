@@ -132,12 +132,12 @@ func TestErrorHandler(t *testing.T) {
 	}
 }
 
-func TestLoginHandler_successEndToEnd(t *testing.T) {
+func TestWebHandler_successEndToEnd(t *testing.T) {
 	digitsProxyClient, _, server := setupDigitsTestServer(testAccountJSON)
 	defer server.Close()
 
 	// setup test server which uses go-digits/login for Digits login
-	handlerConfig := Config{
+	handlerConfig := WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
 		// proxies all requests to the digits test server
 		HTTPClient: digitsProxyClient,
@@ -156,11 +156,11 @@ func TestLoginHandler_successEndToEnd(t *testing.T) {
 	}
 }
 
-func TestLoginHandlerFunc_invalidPOSTArguments(t *testing.T) {
+func TestWebHandler_invalidPOSTArguments(t *testing.T) {
 	digitsProxyClient, _, server := setupDigitsTestServer(testAccountJSON)
 	defer server.Close()
 
-	handlerConfig := Config{
+	handlerConfig := WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
 		HTTPClient:  digitsProxyClient,
 		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
@@ -180,11 +180,11 @@ func TestLoginHandlerFunc_invalidPOSTArguments(t *testing.T) {
 	assertBodyString(t, resp.Body, ErrUnableToGetDigitsAccount.Error()+"\n")
 }
 
-func TestLoginHandlerFunc_unauthorized(t *testing.T) {
+func TestWebHandler_unauthorized(t *testing.T) {
 	digitsProxyClient, _, server := setupUnauthorizedDigitsTestServer()
 	defer server.Close()
 
-	handlerConfig := Config{
+	handlerConfig := WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
 		HTTPClient:  digitsProxyClient,
 		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
@@ -197,8 +197,8 @@ func TestLoginHandlerFunc_unauthorized(t *testing.T) {
 	assertBodyString(t, resp.Body, ErrUnableToGetDigitsAccount.Error()+"\n")
 }
 
-func TestLoginHandlerFunc_digitsAPIDown(t *testing.T) {
-	handlerConfig := Config{
+func TestWebHandler_digitsAPIDown(t *testing.T) {
+	handlerConfig := WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
 		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
 		Failure:     DefaultErrorHandler,

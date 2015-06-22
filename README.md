@@ -10,6 +10,7 @@ go-digits provides unofficial Go packages for (Twitter) Digits. Add Digits (phon
 
 * Provides a login handler for adding Digits phone number login to web apps
 * Register a `WebHandler` on your `ServeMux` to handle Digits web logins
+* Register a `TokenHandler` on your `ServeMux` to handle Digits token logins
 * Works with any session library you prefer. No context dependencies.
 
 #### digits [![Coverage](http://gocover.io/_badge/github.com/dghubble/go-digits/digits)](http://gocover.io/github.com/dghubble/go-digits/digits) [![GoDoc](http://godoc.org/github.com/dghubble/go-digits/digits?status.png)](http://godoc.org/github.com/dghubble/go-digits/digits)
@@ -26,7 +27,7 @@ go-digits provides unofficial Go packages for (Twitter) Digits. Add Digits (phon
 
 Read [GoDoc](https://godoc.org/github.com/dghubble/go-digits)
 
-### Login with Digits
+### Phone Numer Login via Digits Web
 
 Get started with the [example app](examples/login). Paste in your Digits consumer key and run it locally to see phone number login in action.
 
@@ -86,8 +87,7 @@ account, resp, err := client.Accounts.Account()
 
 ## Roadmap
 
-* Configure OAuth Echo keys
-* Token Exchange for Mobile Apps
+* Configurable POST field names
 
 ## License
 

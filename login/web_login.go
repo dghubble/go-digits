@@ -74,7 +74,7 @@ func (h *WebHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// fetch Digits Account
 	account, resp, err := requestAccount(h.httpClient, accountEndpoint, accountRequestHeader)
 	// validate the Digits Account
-	err = ValidateAccountResponse(account, resp, err)
+	err = validateAccountResponse(account, resp, err)
 	if err != nil {
 		h.failure.ServeHTTP(w, err, http.StatusBadRequest)
 		return
@@ -117,10 +117,10 @@ func validateEcho(accountEndpoint, accountRequestHeader, consumerKey string) err
 	return nil
 }
 
-// ValidateAccountResponse returns an error if the given Digits Account, raw
+// validateAccountResponse returns an error if the given Digits Account, raw
 // http.Response, or error from Digits are unexpected. Returns nil if the
 // account response is valid.
-func ValidateAccountResponse(account *digits.Account, resp *http.Response, err error) error {
+func validateAccountResponse(account *digits.Account, resp *http.Response, err error) error {
 	if err != nil || resp.StatusCode != http.StatusOK || account == nil {
 		return ErrUnableToGetDigitsAccount
 	}

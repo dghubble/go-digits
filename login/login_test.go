@@ -98,19 +98,19 @@ func TestValidateAccountResponse(t *testing.T) {
 	respErr := errors.New("some error decoding Account")
 
 	// success case
-	if err := ValidateAccountResponse(validAccount, successResp, nil); err != nil {
+	if err := validateAccountResponse(validAccount, successResp, nil); err != nil {
 		t.Errorf("expected error to be nil, got %v", err)
 	}
 
 	// error cases
 	errorCases := []error{
 		// account missing credentials
-		ValidateAccountResponse(emptyAccount, successResp, nil),
+		validateAccountResponse(emptyAccount, successResp, nil),
 		// Digits account API did not return a 200
-		ValidateAccountResponse(validAccount, badResp, nil),
+		validateAccountResponse(validAccount, badResp, nil),
 		// Network error or JSON unmarshalling error
-		ValidateAccountResponse(validAccount, successResp, respErr),
-		ValidateAccountResponse(validAccount, badResp, respErr),
+		validateAccountResponse(validAccount, successResp, respErr),
+		validateAccountResponse(validAccount, badResp, respErr),
 	}
 	for _, err := range errorCases {
 		if err != ErrUnableToGetDigitsAccount {

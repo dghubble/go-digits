@@ -51,7 +51,7 @@ func (h *TokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	// fetch Digits Account
 	account, resp, err := digitsClient.Accounts.Account()
-	err = ValidateAccountResponse(account, resp, err)
+	err = validateAccountResponse(account, resp, err)
 	if err != nil {
 		h.failure.ServeHTTP(w, err, http.StatusBadRequest)
 		return

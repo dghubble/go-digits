@@ -29,7 +29,7 @@ func New() *http.ServeMux {
 	mux.HandleFunc("/logout", logoutHandler)
 
 	// 1. Register a Digits WebHandler to receive Javascript login POST
-	handlerConfig := login.Config{
+	handlerConfig := login.WebHandlerConfig{
 		ConsumerKey: digitsConsumerKey,
 		Success:     login.SuccessHandlerFunc(issueWebSession),
 		Failure:     login.DefaultErrorHandler,

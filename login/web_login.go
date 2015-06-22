@@ -45,7 +45,7 @@ type WebHandler struct {
 }
 
 // NewWebHandler returns a new WebHandler.
-func NewWebHandler(config WebHandlerConfig) *WebHandler {
+func NewWebHandler(config *WebHandlerConfig) *WebHandler {
 	httpClient := config.HTTPClient
 	if httpClient == nil {
 		httpClient = http.DefaultClient

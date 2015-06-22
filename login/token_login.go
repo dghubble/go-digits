@@ -31,7 +31,7 @@ type TokenHandler struct {
 }
 
 // NewTokenHandler returns a new TokenHandler.
-func NewTokenHandler(config TokenHandlerConfig) *TokenHandler {
+func NewTokenHandler(config *TokenHandlerConfig) *TokenHandler {
 	return &TokenHandler{
 		authConfig: config.AuthConfig,
 		success:    config.Success,

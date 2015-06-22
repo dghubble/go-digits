@@ -137,7 +137,7 @@ func TestWebHandler_successEndToEnd(t *testing.T) {
 	defer server.Close()
 
 	// setup test server which uses go-digits/login for Digits login
-	handlerConfig := WebHandlerConfig{
+	handlerConfig := &WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
 		// proxies all requests to the digits test server
 		HTTPClient: digitsProxyClient,
@@ -160,7 +160,7 @@ func TestWebHandler_invalidPOSTArguments(t *testing.T) {
 	digitsProxyClient, _, server := setupDigitsTestServer(testAccountJSON)
 	defer server.Close()
 
-	handlerConfig := WebHandlerConfig{
+	handlerConfig := &WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
 		HTTPClient:  digitsProxyClient,
 		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
@@ -184,7 +184,7 @@ func TestWebHandler_unauthorized(t *testing.T) {
 	digitsProxyClient, _, server := setupUnauthorizedDigitsTestServer()
 	defer server.Close()
 
-	handlerConfig := WebHandlerConfig{
+	handlerConfig := &WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
 		HTTPClient:  digitsProxyClient,
 		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
@@ -198,7 +198,7 @@ func TestWebHandler_unauthorized(t *testing.T) {
 }
 
 func TestWebHandler_digitsAPIDown(t *testing.T) {
-	handlerConfig := WebHandlerConfig{
+	handlerConfig := &WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
 		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
 		Failure:     DefaultErrorHandler,

@@ -5,6 +5,8 @@ Package login provides a Digits WebHandler which receives POSTed OAuth Echo
 headers, validates them, and fetches the Digits Account. Handling is delegated
 to the SuccessHandler or ErrorHandler to issue a session.
 
+Web Login
+
 Get started with the example app https://github.com/dghubble/go-digits/tree/master/examples/login.
 Paste in your Digits consumer key and run it locally to see phone number login
 in action.

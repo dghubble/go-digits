@@ -16,12 +16,13 @@ const (
 	accountRequestHeaderKey = "accountRequestHeader"
 )
 
-// Errors for missing data, invalid data, and errors gettting Digits accounts
+// Errors for missing echo data, invalid data, and errors gettting Digits
+// accounts.
 var (
-	ErrMissingAccountEndpoint      = fmt.Errorf("digits: missing Digits OAuth Echo %s in POST form", accountEndpointKey)
-	ErrMissingAccountRequestHeader = fmt.Errorf("digits: missing Digits OAuth Echo %s in POST form", accountRequestHeaderKey)
+	ErrMissingAccountEndpoint      = fmt.Errorf("digits: missing OAuth Echo form field %s", accountEndpointKey)
+	ErrMissingAccountRequestHeader = fmt.Errorf("digits: missing OAuth Echo form field %s", accountRequestHeaderKey)
 	ErrInvalidDigitsEndpoint       = errors.New("digits: invalid Digits endpoint")
-	ErrInvalidConsumerKey          = errors.New("digits: incorrect Digits OAuth Echo Auth Header Consumer Key")
+	ErrInvalidConsumerKey          = errors.New("digits: incorrect OAuth Echo Auth Header Consumer Key")
 	ErrUnableToGetDigitsAccount    = errors.New("digits: unable to get Digits account")
 	consumerKeyRegexp              = regexp.MustCompile("oauth_consumer_key=\"(.*?)\"")
 )

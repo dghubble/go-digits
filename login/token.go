@@ -2,9 +2,21 @@
 package login
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/dghubble/go-digits/digits"
+)
+
+const (
+	accessTokenKey       = "digitsAccessToken"
+	accessTokenSecretKey = "digitsAccessTokenSecret"
+)
+
+// Errors for missing token or token secret form fields.
+var (
+	ErrMissingToken       = fmt.Errorf("digits: missing Access Token form field %s", accessTokenKey)
+	ErrMissingTokenSecret = fmt.Errorf("digits: missing Access Token Secret form field %s", accessTokenSecretKey)
 )
 
 // AuthClientSource is an interface for sources of oauth1 token authorized
@@ -44,8 +56,13 @@ func NewTokenHandler(config *TokenHandlerConfig) *TokenHandler {
 // Otherwise, the ErrorHandler is called.
 func (h *TokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
-	accessToken := req.PostForm.Get("digitsAccessToken")
-	accessTokenSecret := req.PostForm.Get("digitsAccessTokenSecret")
+	accessToken := req.PostForm.Get(accessTokenKey)
+	accessTokenSecret := req.PostForm.Get(accessTokenSecretKey)
+	err := validateToken(accessToken, accessTokenSecret)
+	if err != nil {
+		h.failure.ServeHTTP(w, err, http.StatusBadRequest)
+		return
+	}
 	httpClient := h.authConfig.GetClient(accessToken, accessTokenSecret)
 	digitsClient := digits.NewClient(httpClient)
 
@@ -57,4 +74,15 @@ func (h *TokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	h.success.ServeHTTP(w, req, account)
+}
+
+// validateToken returns an error if the token or token secret is missing.
+func validateToken(accessToken, accessTokenSecret string) error {
+	if accessToken == "" {
+		return ErrMissingToken
+	}
+	if accessTokenSecret == "" {
+		return ErrMissingTokenSecret
+	}
+	return nil
 }

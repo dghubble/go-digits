@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	testDigitsToken       = "some-access-token"
-	testDigitsTokenSecret = "some-access-token-secret"
+	testDigitsToken       = "some-token"
+	testDigitsTokenSecret = "some-token-secret"
 )
 
 func TestValidateToken_missingToken(t *testing.T) {
@@ -41,7 +41,7 @@ func TestTokenHandler_successEndToEnd(t *testing.T) {
 	ts := httptest.NewServer(NewTokenHandler(handlerConfig))
 
 	// POST Digits token from client
-	resp, err := http.PostForm(ts.URL, url.Values{"digitsAccessToken": {testDigitsToken}, "digitsAccessTokenSecret": {testDigitsTokenSecret}})
+	resp, err := http.PostForm(ts.URL, url.Values{"digitsToken": {testDigitsToken}, "digitsTokenSecret": {testDigitsTokenSecret}})
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
@@ -63,9 +63,9 @@ func TestTokenHandler_invalidPOSTArguments(t *testing.T) {
 	ts := httptest.NewServer(NewTokenHandler(handlerConfig))
 
 	// POST Digits Access Token
-	resp, _ := http.PostForm(ts.URL, url.Values{"wrongFieldName": {testDigitsToken}, "digitsAccessTokenSecret": {testDigitsTokenSecret}})
+	resp, _ := http.PostForm(ts.URL, url.Values{"wrongFieldName": {testDigitsToken}, "digitsTokenSecret": {testDigitsTokenSecret}})
 	assertBodyString(t, resp.Body, ErrMissingToken.Error()+"\n")
-	resp, _ = http.PostForm(ts.URL, url.Values{"digitsAccessToken": {testDigitsToken}, "wrongFieldName": {testDigitsTokenSecret}})
+	resp, _ = http.PostForm(ts.URL, url.Values{"digitsToken": {testDigitsToken}, "wrongFieldName": {testDigitsTokenSecret}})
 	assertBodyString(t, resp.Body, ErrMissingTokenSecret.Error()+"\n")
 }
 
@@ -82,7 +82,7 @@ func TestTokenHandler_unauthorized(t *testing.T) {
 	ts := httptest.NewServer(NewTokenHandler(handlerConfig))
 
 	// POST Digits Access Token
-	resp, _ := http.PostForm(ts.URL, url.Values{"digitsAccessToken": {testDigitsToken}, "digitsAccessTokenSecret": {testDigitsTokenSecret}})
+	resp, _ := http.PostForm(ts.URL, url.Values{"digitsToken": {testDigitsToken}, "digitsTokenSecret": {testDigitsTokenSecret}})
 	assertBodyString(t, resp.Body, ErrUnableToGetDigitsAccount.Error()+"\n")
 }
 
@@ -100,7 +100,7 @@ func TestTokenHandler_digitsAPIDown(t *testing.T) {
 	ts := httptest.NewServer(NewTokenHandler(handlerConfig))
 
 	// POST Digits Access Token
-	resp, _ := http.PostForm(ts.URL, url.Values{"digitsAccessToken": {testDigitsToken}, "digitsAccessTokenSecret": {testDigitsTokenSecret}})
+	resp, _ := http.PostForm(ts.URL, url.Values{"digitsToken": {testDigitsToken}, "digitsTokenSecret": {testDigitsTokenSecret}})
 	assertBodyString(t, resp.Body, ErrUnableToGetDigitsAccount.Error()+"\n")
 }
 

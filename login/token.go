@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	accessTokenKey       = "digitsAccessToken"
-	accessTokenSecretKey = "digitsAccessTokenSecret"
+	accessTokenKey       = "digitsToken"
+	accessTokenSecretKey = "digitsTokenSecret"
 )
 
 // Errors for missing token or token secret form fields.
 var (
-	ErrMissingToken       = fmt.Errorf("digits: missing Access Token form field %s", accessTokenKey)
-	ErrMissingTokenSecret = fmt.Errorf("digits: missing Access Token Secret form field %s", accessTokenSecretKey)
+	ErrMissingToken       = fmt.Errorf("digits: missing Token form field %s", accessTokenKey)
+	ErrMissingTokenSecret = fmt.Errorf("digits: missing Token Secret form field %s", accessTokenSecretKey)
 )
 
 // AuthClientSource is an interface for sources of oauth1 token authorized

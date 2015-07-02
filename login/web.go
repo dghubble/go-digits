@@ -63,6 +63,10 @@ func NewWebHandler(config *WebHandlerConfig) *WebHandler {
 // fetches the Digits Account. If successful, handling is delegated to the
 // SuccessHandler. Otherwise, the ErrorHandler is called.
 func (h *WebHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if req.Method != "POST" {
+		h.failure.ServeHTTP(w, nil, http.StatusMethodNotAllowed)
+		return
+	}
 	req.ParseForm()
 	accountEndpoint := req.PostForm.Get(accountEndpointKey)
 	accountRequestHeader := req.PostForm.Get(accountRequestHeaderKey)
@@ -149,7 +153,11 @@ var DefaultErrorHandler = &passthroughErrorHandler{}
 type passthroughErrorHandler struct{}
 
 func (e passthroughErrorHandler) ServeHTTP(w http.ResponseWriter, err error, code int) {
-	http.Error(w, err.Error(), code)
+	if err != nil {
+		http.Error(w, err.Error(), code)
+		return
+	}
+	http.Error(w, "", code)
 }
 
 // HandlerFunc adapters

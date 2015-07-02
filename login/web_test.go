@@ -131,20 +131,18 @@ func TestErrorHandler(t *testing.T) {
 }
 
 func TestWebHandler_successEndToEnd(t *testing.T) {
-	digitsProxyClient, _, server := setupDigitsTestServer(testAccountJSON)
+	proxyClient, _, server := newDigitsTestServer(testAccountJSON)
 	defer server.Close()
 
-	// setup test server which uses go-digits/login for Digits login
 	handlerConfig := &WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
-		// proxies all requests to the digits test server
-		HTTPClient: digitsProxyClient,
-		Success:    SuccessHandlerFunc(successChecks(t)),
-		Failure:    ErrorHandlerFunc(errorOnFailure(t)),
+		HTTPClient:  proxyClient,
+		Success:     SuccessHandlerFunc(successChecks(t)),
+		Failure:     ErrorHandlerFunc(errorOnFailure(t)),
 	}
+	// setup server under test
 	ts := httptest.NewServer(NewWebHandler(handlerConfig))
-
-	// POST Digits OAuth Echo headers
+	// POST OAuth Echo data
 	resp, err := http.PostForm(ts.URL, url.Values{"accountEndpoint": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
@@ -154,19 +152,35 @@ func TestWebHandler_successEndToEnd(t *testing.T) {
 	}
 }
 
-func TestWebHandler_invalidPOSTArguments(t *testing.T) {
-	digitsProxyClient, _, server := setupDigitsTestServer(testAccountJSON)
+func TestWebHandler_wrongMethod(t *testing.T) {
+	proxyClient, _, server := newDigitsTestServer(testAccountJSON)
 	defer server.Close()
 
 	handlerConfig := &WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
-		HTTPClient:  digitsProxyClient,
+		HTTPClient:  proxyClient,
 		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
 		Failure:     DefaultErrorHandler,
 	}
 	ts := httptest.NewServer(NewWebHandler(handlerConfig))
+	resp, _ := http.Get(ts.URL)
+	if resp.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("expected response code %d, got %d", http.StatusMethodNotAllowed, resp.StatusCode)
+	}
+}
 
-	// POST Digits OAuth Echo headers
+func TestWebHandler_invalidPOSTArguments(t *testing.T) {
+	proxyClient, _, server := newDigitsTestServer(testAccountJSON)
+	defer server.Close()
+
+	handlerConfig := &WebHandlerConfig{
+		ConsumerKey: testConsumerKey,
+		HTTPClient:  proxyClient,
+		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
+		Failure:     DefaultErrorHandler,
+	}
+	ts := httptest.NewServer(NewWebHandler(handlerConfig))
+	// POST Digits OAuth Echo data
 	resp, _ := http.PostForm(ts.URL, url.Values{"wrongKeyName": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
 	assertBodyString(t, resp.Body, ErrMissingAccountEndpoint.Error()+"\n")
 	resp, _ = http.PostForm(ts.URL, url.Values{"accountEndpoint": {"https://evil.com"}, "accountRequestHeader": {testAccountRequestHeader}})
@@ -179,18 +193,17 @@ func TestWebHandler_invalidPOSTArguments(t *testing.T) {
 }
 
 func TestWebHandler_unauthorized(t *testing.T) {
-	digitsProxyClient, _, server := setupUnauthorizedDigitsTestServer()
+	proxyClient, _, server := newRejectingTestServer()
 	defer server.Close()
 
 	handlerConfig := &WebHandlerConfig{
 		ConsumerKey: testConsumerKey,
-		HTTPClient:  digitsProxyClient,
+		HTTPClient:  proxyClient,
 		Success:     SuccessHandlerFunc(errorOnSuccess(t)),
 		Failure:     DefaultErrorHandler,
 	}
 	ts := httptest.NewServer(NewWebHandler(handlerConfig))
-
-	// POST Digits OAuth Echo headers
+	// POST OAuth Echo data
 	resp, _ := http.PostForm(ts.URL, url.Values{"accountEndpoint": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
 	assertBodyString(t, resp.Body, ErrUnableToGetDigitsAccount.Error()+"\n")
 }
@@ -207,8 +220,7 @@ func TestWebHandler_digitsAPIDown(t *testing.T) {
 		Failure:     DefaultErrorHandler,
 	}
 	ts := httptest.NewServer(NewWebHandler(handlerConfig))
-
-	// POST Digits OAuth Echo headers
+	// POST OAuth Echo data
 	resp, _ := http.PostForm(ts.URL, url.Values{"accountEndpoint": {testAccountEndpoint}, "accountRequestHeader": {testAccountRequestHeader}})
 	assertBodyString(t, resp.Body, ErrUnableToGetDigitsAccount.Error()+"\n")
 }

@@ -55,6 +55,10 @@ func NewTokenHandler(config *TokenHandlerConfig) *TokenHandler {
 // Account. If successful, handling is delegated to the SuccessHandler.
 // Otherwise, the ErrorHandler is called.
 func (h *TokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if req.Method != "POST" {
+		h.failure.ServeHTTP(w, nil, http.StatusMethodNotAllowed)
+		return
+	}
 	req.ParseForm()
 	accessToken := req.PostForm.Get(accessTokenKey)
 	accessTokenSecret := req.PostForm.Get(accessTokenSecretKey)

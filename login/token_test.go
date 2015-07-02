@@ -27,9 +27,9 @@ func TestValidateToken_missingTokenSecret(t *testing.T) {
 }
 
 func TestTokenHandler_successEndToEnd(t *testing.T) {
-	digitsProxyClient, _, server := setupDigitsTestServer(testAccountJSON)
+	proxyClient, _, server := newDigitsTestServer(testAccountJSON)
 	defer server.Close()
-	proxyClientSource := newStubClientSource(digitsProxyClient)
+	proxyClientSource := newStubClientSource(proxyClient)
 
 	handlerConfig := &TokenHandlerConfig{
 		// returns an http.Client which proxies requests to the digits test server
@@ -37,10 +37,9 @@ func TestTokenHandler_successEndToEnd(t *testing.T) {
 		Success:    SuccessHandlerFunc(successChecks(t)),
 		Failure:    ErrorHandlerFunc(errorOnFailure(t)),
 	}
-	// setup test server which uses go-digits/login for Digits login
+	// server under test
 	ts := httptest.NewServer(NewTokenHandler(handlerConfig))
-
-	// POST Digits token from client
+	// POST Digits access token
 	resp, err := http.PostForm(ts.URL, url.Values{"digitsToken": {testDigitsToken}, "digitsTokenSecret": {testDigitsTokenSecret}})
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
@@ -50,10 +49,10 @@ func TestTokenHandler_successEndToEnd(t *testing.T) {
 	}
 }
 
-func TestTokenHandler_invalidPOSTArguments(t *testing.T) {
-	digitsProxyClient, _, server := setupDigitsTestServer(testAccountJSON)
+func TestTokenHandler_wrongMethod(t *testing.T) {
+	proxyClient, _, server := newDigitsTestServer(testAccountJSON)
 	defer server.Close()
-	proxyClientSource := newStubClientSource(digitsProxyClient)
+	proxyClientSource := newStubClientSource(proxyClient)
 
 	handlerConfig := &TokenHandlerConfig{
 		AuthConfig: proxyClientSource,
@@ -61,8 +60,24 @@ func TestTokenHandler_invalidPOSTArguments(t *testing.T) {
 		Failure:    DefaultErrorHandler,
 	}
 	ts := httptest.NewServer(NewTokenHandler(handlerConfig))
+	resp, _ := http.Get(ts.URL)
+	if resp.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("expected response code %d, got %d", http.StatusMethodNotAllowed, resp.StatusCode)
+	}
+}
 
-	// POST Digits Access Token
+func TestTokenHandler_invalidPOSTArguments(t *testing.T) {
+	proxyClient, _, server := newDigitsTestServer(testAccountJSON)
+	defer server.Close()
+	proxyClientSource := newStubClientSource(proxyClient)
+
+	handlerConfig := &TokenHandlerConfig{
+		AuthConfig: proxyClientSource,
+		Success:    SuccessHandlerFunc(errorOnSuccess(t)),
+		Failure:    DefaultErrorHandler,
+	}
+	ts := httptest.NewServer(NewTokenHandler(handlerConfig))
+	// POST Digits access Token
 	resp, _ := http.PostForm(ts.URL, url.Values{"wrongFieldName": {testDigitsToken}, "digitsTokenSecret": {testDigitsTokenSecret}})
 	assertBodyString(t, resp.Body, ErrMissingToken.Error()+"\n")
 	resp, _ = http.PostForm(ts.URL, url.Values{"digitsToken": {testDigitsToken}, "wrongFieldName": {testDigitsTokenSecret}})
@@ -70,9 +85,9 @@ func TestTokenHandler_invalidPOSTArguments(t *testing.T) {
 }
 
 func TestTokenHandler_unauthorized(t *testing.T) {
-	digitsProxyClient, _, server := setupUnauthorizedDigitsTestServer()
+	proxyClient, _, server := newRejectingTestServer()
 	defer server.Close()
-	proxyClientSource := newStubClientSource(digitsProxyClient)
+	proxyClientSource := newStubClientSource(proxyClient)
 
 	handlerConfig := &TokenHandlerConfig{
 		AuthConfig: proxyClientSource,
@@ -80,8 +95,7 @@ func TestTokenHandler_unauthorized(t *testing.T) {
 		Failure:    DefaultErrorHandler,
 	}
 	ts := httptest.NewServer(NewTokenHandler(handlerConfig))
-
-	// POST Digits Access Token
+	// POST Digits access Token
 	resp, _ := http.PostForm(ts.URL, url.Values{"digitsToken": {testDigitsToken}, "digitsTokenSecret": {testDigitsTokenSecret}})
 	assertBodyString(t, resp.Body, ErrUnableToGetDigitsAccount.Error()+"\n")
 }

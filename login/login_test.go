@@ -10,24 +10,21 @@ import (
 	"testing"
 )
 
-// Testing Utils
-
-func setupDigitsTestServer(jsonData string) (*http.Client, *http.ServeMux, *httptest.Server) {
-	digitsProxyClient, digitsMux, digitsServer := testServer()
-	digitsMux.HandleFunc("/1.1/sdk/account.json", func(w http.ResponseWriter, r *http.Request) {
+func newDigitsTestServer(jsonData string) (*http.Client, *http.ServeMux, *httptest.Server) {
+	client, mux, server := testServer()
+	mux.HandleFunc("/1.1/sdk/account.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, jsonData)
 	})
-	return digitsProxyClient, digitsMux, digitsServer
+	return client, mux, server
 }
 
-// fake Digits server will always return 401 Unauthorized
-func setupUnauthorizedDigitsTestServer() (*http.Client, *http.ServeMux, *httptest.Server) {
-	digitsProxyClient, digitsMux, digitsServer := testServer()
-	digitsMux.HandleFunc("/1.1/sdk/account.json", func(w http.ResponseWriter, r *http.Request) {
+func newRejectingTestServer() (*http.Client, *http.ServeMux, *httptest.Server) {
+	client, mux, server := testServer()
+	mux.HandleFunc("/1.1/sdk/account.json", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(401)
 	})
-	return digitsProxyClient, digitsMux, digitsServer
+	return client, mux, server
 }
 
 // testServer returns an http Client, ServeMux, and Server. The client proxies

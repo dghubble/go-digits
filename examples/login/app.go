@@ -69,7 +69,7 @@ func profileHandler(w http.ResponseWriter, req *http.Request) {
 // logoutHandler destroys the session on POSTs and redirects to home.
 func logoutHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
-		sessionStore.Destroy(w, sessionStore.New(sessionName))
+		sessionStore.Destroy(w, sessionName)
 	}
 	http.Redirect(w, req, "/", http.StatusFound)
 }

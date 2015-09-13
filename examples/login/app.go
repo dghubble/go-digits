@@ -3,12 +3,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/dghubble/go-digits/digits"
-	"github.com/dghubble/go-digits/login"
-	"github.com/dghubble/sessions"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/dghubble/go-digits/digits"
+	"github.com/dghubble/go-digits/login"
+	"github.com/dghubble/sessions"
 )
 
 const (

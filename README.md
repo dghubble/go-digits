@@ -74,10 +74,10 @@ The `digits` package provides a client and models for the Digits API. By design,
 import "github.com/dghubble/go-digits/digits"
 import "github.com/dghubble/oauth1"
 
-authConfig := oauth1.NewConfig("consumerKey", "consumerSecret")
+config := oauth1.NewConfig("consumerKey", "consumerSecret")
 token := oauth1.NewToken("accessToken", "accessTokenSecret")
-// http.Client will automatically authorize Requests
-httpClient := authConfig.Client(token)
+// OAuth1 http.Client will automatically authorize Requests
+httpClient := config.Client(oauth1.NoContext, token)
 
 // digits client
 client := digits.NewClient(httpClient)

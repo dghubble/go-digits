@@ -20,6 +20,6 @@ To demonstrate making a request as the application, on behalf of the user, set t
 
 Compile and run
 
-    go run whoami.go
+    go run requests.go
 
 to show account details of the user.

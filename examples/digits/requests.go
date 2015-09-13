@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/dghubble/go-digits/digits"
 	"github.com/dghubble/oauth1"
 	"github.com/kelseyhightower/envconfig"
-	"log"
 )
 
 type config struct {
@@ -31,7 +32,7 @@ func main() {
 	authConfig := oauth1.NewConfig(c.ConsumerKey, c.ConsumerSecret)
 	token := oauth1.NewToken(c.AccessToken, c.AccessTokenSecret)
 	// http.Client which will automatically authorize Request
-	httpClient := authConfig.Client(token)
+	httpClient := authConfig.Client(oauth1.NoContext, token)
 
 	// digits client
 	client := digits.NewClient(httpClient)

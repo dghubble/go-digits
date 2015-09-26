@@ -1,6 +1,8 @@
 /*
 Package login provides a WebHandler for implementing Digits phone number login.
 
+Warning: Digits login has moved to github.com/dghubble/gologin/digits.
+
 Package login provides a Digits WebHandler which receives POSTed OAuth Echo
 headers, validates them, and fetches the Digits Account. Handling is delegated
 to the SuccessHandler or ErrorHandler to issue a session.

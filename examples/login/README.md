@@ -3,6 +3,8 @@
 
 Twitter's [Digits](http://get.digits.com/) service provides phone number login via SMS confirmation codes for any web app or mobile app.
 
+**Warning**: Digits login has moved to github.com/dghubble/gologin/digits.
+
 ## Digits for Web
 
 The Digits Javascipt snippet launches a web popup for user phone number and confirmation code entry. OAuth Echo headers [source](https://dev.twitter.com/twitter-kit/web/digits) are returned to the page.

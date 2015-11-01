@@ -5,6 +5,8 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewClient(t *testing.T) {
@@ -13,8 +15,6 @@ func TestNewClient(t *testing.T) {
 		t.Errorf("Must pass AccountService a derived sling copy.")
 	}
 }
-
-// testing utils
 
 // testServer returns an http Client, ServeMux, and Server. The client proxies
 // requests to the server and handlers can be registered on the mux to handle
@@ -47,8 +47,17 @@ func (t *RewriteTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	return t.Transport.RoundTrip(req)
 }
 
+// assertMethod tests that the Request has the expected HTTP method.
 func assertMethod(t *testing.T, expectedMethod string, req *http.Request) {
-	if actualMethod := req.Method; actualMethod != expectedMethod {
-		t.Errorf("expected method %s, got %s", expectedMethod, actualMethod)
+	assert.Equal(t, expectedMethod, req.Method)
+}
+
+// assertQuery tests that the Request has the expected url query key/val pairs
+func assertQuery(t *testing.T, expected map[string]string, req *http.Request) {
+	queryValues := req.URL.Query()
+	expectedValues := url.Values{}
+	for key, value := range expected {
+		expectedValues.Add(key, value)
 	}
+	assert.Equal(t, expectedValues, queryValues)
 }

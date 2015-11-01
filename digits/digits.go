@@ -1,19 +1,21 @@
 package digits
 
 import (
-	"github.com/dghubble/sling"
 	"net/http"
+
+	"github.com/dghubble/sling"
 )
 
-// DigitsAPI required protocol and domain
+// Digits API and version
 const DigitsAPI = "https://api.digits.com"
 const apiVersion = "/1.1/"
 
-// Client is a Digits client for making Digits API request
+// Client is a Digits client for making Digits API requests.
 type Client struct {
 	sling *sling.Sling
 	// Digits API Services
 	Accounts *AccountService
+	Contacts *ContactService
 }
 
 // NewClient returns a new Client.
@@ -22,5 +24,6 @@ func NewClient(httpClient *http.Client) *Client {
 	return &Client{
 		sling:    base,
 		Accounts: NewAccountService(base.New()),
+		Contacts: NewContactService(base.New()),
 	}
 }

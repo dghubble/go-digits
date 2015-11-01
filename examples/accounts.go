@@ -31,11 +31,18 @@ func main() {
 
 	// Digits client
 	client := digits.NewClient(httpClient)
+
 	// get current user's Digits Account
 	account, _, err := client.Accounts.Account()
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Printf("Digits ACCOUNT:\n%+v\n", account)
+		fmt.Printf("ACCOUNT:\n%+v\n", account)
 	}
+
+	// get Digits users who have signed up for the Digits App and are known to
+	// the current user
+	matchParams := &digits.MatchesParams{Count: 20}
+	contacts, _, _ := client.Contacts.Matches(matchParams)
+	fmt.Printf("CONTACT MATCHES:\n%+v\n", contacts)
 }

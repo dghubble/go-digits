@@ -1,20 +1,29 @@
 package digits
 
 import (
-	"github.com/dghubble/sling"
 	"net/http"
+
+	"github.com/dghubble/sling"
 )
 
-// Account is a Digits user account
+// Account is a Digits user account.
 type Account struct {
-	AccessToken AccessToken `json:"access_token"`
-	ID          int64       `json:"id"`
-	IDStr       string      `json:"id_str"`
-	CreatedAt   string      `json:"created_at"`
-	PhoneNumber string      `json:"phone_number"`
+	AccessToken      AccessToken `json:"access_token"`
+	CreatedAt        string      `json:"created_at"`
+	Email            Email       `json:"email_address"`
+	ID               int64       `json:"id"`
+	IDStr            string      `json:"id_str"`
+	PhoneNumber      string      `json:"phone_number"`
+	VerificationType string      `json:"verification_type"`
 }
 
-// AccessToken is a Digits OAuth1 access token and secret
+// Email is a Digits user email.
+type Email struct {
+	Address  string `json:"address"`
+	Verified bool   `json:"is_verified"`
+}
+
+// AccessToken is a Digits OAuth1 access token and secret.
 type AccessToken struct {
 	Token  string `json:"token"`
 	Secret string `json:"secret"`

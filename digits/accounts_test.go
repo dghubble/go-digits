@@ -14,7 +14,7 @@ func TestAccountService_Account(t *testing.T) {
 	mux.HandleFunc("/1.1/sdk/account.json", func(w http.ResponseWriter, r *http.Request) {
 		assertMethod(t, "GET", r)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"id": 11, "id_str": "11", "phone_number": "0123456789", "access_token": {"token": "t", "secret": "s"}}`)
+		fmt.Fprintf(w, `{"id": 11, "id_str": "11", "phone_number": "0123456789", "email_address":{"address":"user@example.com","is_verified":true}, "access_token": {"token": "t", "secret": "s"}, "verification_type":"sms"}`)
 	})
 
 	client := NewClient(httpClient)
@@ -22,7 +22,14 @@ func TestAccountService_Account(t *testing.T) {
 	if err != nil {
 		t.Errorf("Accounts.Account error %v", err)
 	}
-	expected := &Account{ID: 11, IDStr: "11", PhoneNumber: "0123456789", AccessToken: AccessToken{Token: "t", Secret: "s"}}
+	expected := &Account{
+		AccessToken:      AccessToken{Token: "t", Secret: "s"},
+		Email:            Email{Address: "user@example.com", Verified: true},
+		ID:               11,
+		IDStr:            "11",
+		PhoneNumber:      "0123456789",
+		VerificationType: "sms",
+	}
 	if !reflect.DeepEqual(expected, account) {
 		t.Errorf("Accounts.Account expected:\n%+v\ngot:\n%+v", expected, account)
 	}

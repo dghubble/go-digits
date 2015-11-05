@@ -1,23 +1,28 @@
 /*
-Package digits provides a client and models for the Digits API.
+Package digits provides a client for the Digits API.
 
-The digits package provides a client and models for the Digits API. By design,
-the package is decoupled from OAuth concerns. An http.Client which
-transparently handles OAuth1 request signing should be passed to create a
-Digits Client. See https://github.com/dghubble/oauth1.
+The digits package provides a Client for accessing Digits API services. Here
+is an example request for a Digit user's Account.
 
-	import "github.com/dghubble/go-digits/digits"
-	import "github.com/dghubble/oauth1"
+	import (
+		"github.com/dghubble/go-digits/digits"
+		"github.com/dghubble/oauth1"
+	)
 
-	authConfig := oauth1.NewConfig("consumerKey", "consumerSecret")
+	config := oauth1.NewConfig("consumerKey", "consumerSecret")
 	token := oauth1.NewToken("accessToken", "accessTokenSecret")
-	// http.Client will automatically authorize Requests
-	httpClient := authConfig.Client(token)
+	// OAuth1 http.Client will automatically authorize Requests
+	httpClient := config.Client(token)
 
-	// digits client
+	// Digits client
 	client := digits.NewClient(httpClient)
-	// get the current user's Digits Account
+	// get current user's Digits Account
 	account, resp, err := client.Accounts.Account()
 
+The API client accepts any http.Client capable of signing OAuth1 requests to
+handle authorization.
+
+See the OAuth1 package https://github.com/dghubble/oauth1 for authorization
+details and examples.
 */
 package digits

@@ -2,14 +2,16 @@
 # go-digits [![Build Status](https://travis-ci.org/dghubble/go-digits.png)](https://travis-ci.org/dghubble/go-digits) [![Coverage](http://gocover.io/_badge/github.com/dghubble/go-digits/digits)](http://gocover.io/github.com/dghubble/go-digits/digits) [![GoDoc](http://godoc.org/github.com/dghubble/go-digits?status.png)](http://godoc.org/github.com/dghubble/go-digits)
 <img align="right" src="http://storage.googleapis.com/dghubble/digits-gopher.png">
 
-go-digits is a Go client library for the [Digits](https://get.digits.com/) API.
+go-digits is a Go client library for the [Digits](https://get.digits.com/) API. Check the [usage](#usage) section or the [examples](examples) to learn how to access the Digits API.
 
-To implement *Login with Digits* for web or mobile, see the [gologin](https://github.com/dghubble/gologin) package and [examples](https://github.com/dghubble/gologin/tree/master/examples/digits).
+To implement *Login with Digits* for web or mobile, see the gologin [package](https://github.com/dghubble/gologin) and [examples](https://github.com/dghubble/gologin/tree/master/examples/digits).
 
 ### Features
 
-* Digits API Client
+* Digits API Client 
 * AccountService for getting Digits accounts
+* Get verified user phone numbers and email addresses
+* ContactService for finding matching contacts ("friends")
 * Accepts any OAuth1 `http.Client` for authorization
 
 ## Install

@@ -49,7 +49,7 @@ func TestContactService_MatchesAPIError(t *testing.T) {
 
 	client := NewClient(httpClient)
 	_, _, err := client.Contacts.Matches(&MatchesParams{})
-	if assert.NotNil(t, err) {
+	if assert.Error(t, err) {
 		assert.Equal(t, expected, err)
 	}
 }

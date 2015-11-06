@@ -9,7 +9,7 @@ import (
 // Contacts represents a cursored subset of a set of contacts.
 type Contacts struct {
 	NextCursor string `json:"next_cursor"`
-	// matched Digits Users are partially hydrated Accounts (i.e. no token, phone)
+	// matched contacts are partially hydrated Accounts (i.e. no token, phone)
 	Users []Account `json:"users"`
 }
 

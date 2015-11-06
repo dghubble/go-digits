@@ -19,6 +19,6 @@ Get the dependencies for the examples
 
 ## Accounts API
 
-Get the current user's Digits `Account`. Compile and run
+Get the current user's Digits `Account` and lookup matching contacts.
 
-    go run accounts.go
+    go run digits.go

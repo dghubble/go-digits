@@ -2,8 +2,9 @@ package digits
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var testAPIError = &APIError{
@@ -14,24 +15,15 @@ var testAPIError = &APIError{
 var errTestError = fmt.Errorf("unknown host")
 
 func TestAPIError_ErrorString(t *testing.T) {
-	err := APIError{}
-	if err.Error() != "" {
-		t.Errorf("expected \"\", got %v", err)
-	}
-	expected := "digits: 32 Could not authenticate you."
-	if err := testAPIError.Error(); err != expected {
-		t.Errorf("expected %v, got %v", expected, err)
-	}
+	err := &APIError{}
+	assert.Equal(t, "", err.Error())
+	assert.Equal(t, "digits: 32 Could not authenticate you.", testAPIError.Error())
 }
 
 func TestAPIError_Empty(t *testing.T) {
 	err := APIError{}
-	if !err.Empty() {
-		t.Errorf("expected Empty() to return true for %v", err)
-	}
-	if testAPIError.Empty() {
-		t.Errorf("expected Empty() to return false for %v", testAPIError)
-	}
+	assert.True(t, err.Empty())
+	assert.False(t, testAPIError.Empty())
 }
 
 func TestFirstError(t *testing.T) {
@@ -48,8 +40,6 @@ func TestFirstError(t *testing.T) {
 	}
 	for _, c := range cases {
 		err := firstError(c.httpError, c.apiError)
-		if !reflect.DeepEqual(c.expected, err) {
-			t.Errorf("not DeepEqual: expected %v, got %v", c.expected, err)
-		}
+		assert.Equal(t, c.expected, err)
 	}
 }

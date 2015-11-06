@@ -9,13 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewClient(t *testing.T) {
-	client := NewClient(nil)
-	if client.Accounts.sling == client.sling {
-		t.Errorf("Must pass AccountService a derived sling copy.")
-	}
-}
-
 // testServer returns an http Client, ServeMux, and Server. The client proxies
 // requests to the server and handlers can be registered on the mux to handle
 // requests. The caller must close the test server.

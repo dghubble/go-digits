@@ -4,15 +4,12 @@
 
 go-digits is a Go client library for the [Digits](https://get.digits.com/) API. Check the [usage](#usage) section or the [examples](examples) to learn how to access the Digits API.
 
-To implement *Login with Digits* for web or mobile, see the gologin [package](https://github.com/dghubble/gologin) and [examples](https://github.com/dghubble/gologin/tree/master/examples/digits).
-
 ### Features
 
-* Digits API Client 
 * AccountService for getting Digits accounts
 * Get verified user phone numbers and email addresses
 * ContactService for finding matching contacts ("friends")
-* Accepts any OAuth1 `http.Client` for authorization
+* Digits API Client accepts any OAuth1 `http.Client`
 
 ## Install
 
@@ -20,11 +17,11 @@ To implement *Login with Digits* for web or mobile, see the gologin [package](ht
 
 ## Docs
 
-Read [GoDoc](https://godoc.org/github.com/dghubble/go-digits)
+Read [GoDoc](https://godoc.org/github.com/dghubble/go-digits/digits)
 
 ## Usage
 
-The `digits` package provides a Client for accessing Digits API services. Here is an example request for a Digit user's Account.
+The `digits` package provides a `Client` for accessing the Digits API. Here is an example request for a Digit user's Account.
 
 ```go
 import (
@@ -43,9 +40,11 @@ client := digits.NewClient(httpClient)
 account, resp, err := client.Accounts.Account()
 ```
 
-The API client accepts any `http.Client` capable of signing OAuth1 requests to handle authorization.
+### Authentication
 
-See the OAuth1 package [dghubble/oauth1](https://github.com/dghubble/oauth1) for details and examples.
+The API client accepts any `http.Client` capable of signing OAuth1 requests to handle authorization. See the OAuth1 package [dghubble/oauth1](https://github.com/dghubble/oauth1) for details and examples.
+
+To implement Login with Digits for web or mobile, see the gologin [package](https://github.com/dghubble/gologin) and [examples](https://github.com/dghubble/gologin/tree/master/examples/digits).
 
 ## Contributing
 

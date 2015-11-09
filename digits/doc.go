@@ -1,5 +1,5 @@
 /*
-Package digits provides a client for the Digits API.
+Package digits provides a Client for the Digits API.
 
 The digits package provides a Client for accessing Digits API services. Here
 is an example request for a Digit user's Account.
@@ -24,5 +24,7 @@ handle authorization.
 
 See the OAuth1 package https://github.com/dghubble/oauth1 for authorization
 details and examples.
+
+To implement Login with Digits, see https://github.com/dghubble/gologin.
 */
 package digits

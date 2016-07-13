@@ -1,5 +1,5 @@
 
-# go-digits [![Build Status](https://travis-ci.org/dghubble/go-digits.png)](https://travis-ci.org/dghubble/go-digits) [![Coverage](https://gocover.io/_badge/github.com/dghubble/go-digits/digits)](https://gocover.io/github.com/dghubble/go-digits/digits) [![GoDoc](https://godoc.org/github.com/dghubble/go-digits?status.png)](https://godoc.org/github.com/dghubble/go-digits)
+# go-digits [![Build Status](https://travis-ci.org/dghubble/go-digits.png)](https://travis-ci.org/dghubble/go-digits) [![GoDoc](https://godoc.org/github.com/dghubble/go-digits?status.png)](https://godoc.org/github.com/dghubble/go-digits)
 <img align="right" src="https://storage.googleapis.com/dghubble/digits-gopher.png">
 
 go-digits is a Go client library for the [Digits](https://get.digits.com/) API. Check the [usage](#usage) section or the [examples](examples) to learn how to access the Digits API.

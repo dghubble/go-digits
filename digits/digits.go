@@ -6,9 +6,11 @@ import (
 	"github.com/dghubble/sling"
 )
 
-// Digits API and version
-const DigitsAPI = "https://api.digits.com"
-const apiVersion = "/1.1/"
+// DigitsAPI and version
+const (
+	DigitsAPI  = "https://api.digits.com"
+	apiVersion = "/1.1/"
+)
 
 // Client is a Digits client for making Digits API requests.
 type Client struct {
